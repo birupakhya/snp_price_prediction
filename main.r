@@ -195,7 +195,15 @@ plot(model.rpt)
 text(model.rpt, use.n= T, digits=3, cex=0.6)
 prediction.rpt <- predict(model.rpt, newdata = test, type="class")
 printcp(model.rpt)
+control <- trainControl(method = "cv", number = 10 , savePredictions = TRUE)
+price.rpt.cv <- train (priceDir ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data = train , method = "rpart", trControl = control)
+predict.rpt.cv <- predict(price.rpt.cv, newdata = test)
+confusionMatrix(predict.rpt.cv, test$priceDir)
 
 # Modelling using Gradient Boosting
-model.gbm <- gbm(priceDir ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data=train, n.trees=5000, interaction.depth =6, shrinkage=0.01)
+model.gbm <- gbm((unclass(priceDir)-1) ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data=train, n.trees=5000, interaction.depth =6, shrinkage=0.01)
 prediction.gbm <- predict(model.gbm, newdata = test, n.trees=5000, type="response")
+head(prediction.gbm[])
+tail(prediction.gbm[])
+
+
