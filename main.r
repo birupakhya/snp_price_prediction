@@ -1,6 +1,7 @@
 library("caret")
 library ("e1071")
 library ("klaR")
+library("rpart")
 
 setwd('/Users/birupakhya/Desktop')
 
@@ -184,6 +185,13 @@ test <- final_merged_df[5132:nrow(final_merged_df),]
 
 # Modelling using NaiveBayes
 final_merged_df$bnd_cat1 = as.factor(final_merged_df$bnd_cat1, levels = c("awful","Bad","Good","Great","Unchanged"))
-model <- NaiveBayes(priceDir ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5 ,data=train)
-predictions <- predict(model, test)
+model.NB <- NaiveBayes(priceDir ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5 ,data=train)
+predictions <- predict(model.NB, test)
 confusionMatrix(test$priceDir, predictions$class)
+
+# Modelling using Recursive Partition Tree
+model.rpt <- rpart(priceDir ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data=train, cp=0)
+plot(model.rpt)
+text(model.rpt, use.n= T, digits=3, cex=0.6)
+prediction.rpt <- predict(model.rpt, newdata = test, type="class")
+printcp(model.rpt)
