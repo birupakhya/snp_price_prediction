@@ -45,7 +45,7 @@ for (i in 7:nrow(merged_df)){
   snp_pc3[i] <- (merged_df$snp_adj_close[i - 1] - merged_df$snp_adj_close[i - 4]) 
   snp_pc4[i] <- (merged_df$snp_adj_close[i - 1] - merged_df$snp_adj_close[i - 5]) 
   snp_pc5[i] <- (merged_df$snp_adj_close[i - 1] - merged_df$snp_adj_close[i - 6]) 
-  priceDir[i] <- ifelse((merged_df$snp_adj_close[i] - merged_df$snp_adj_close[i - 1]) > 0, 'High', 'Low')
+  priceDir[i] <- ifelse((merged_df$snp_adj_close[i] - merged_df$snp_adj_close[i - 1]) > 0, 1, 0)
 }
 
 # compute price change for bond10yr
@@ -177,3 +177,13 @@ for (i in 7:nrow(merged_df)){
 # combine all the columns for the final time and remove the top 7 rows that have NA value for categories
 final_merged_df <- data.frame(priceDir, snp_cat1, snp_cat2, snp_cat3, snp_cat4, snp_cat5, bnd_cat1, bnd_cat2, bnd_cat3, bnd_cat4, bnd_cat5, oil_cat1, oil_cat2, oil_cat3, oil_cat4, oil_cat5 )
 final_merged_df <- tail(final_merged_df, -6)
+
+# partition dataset into training and test
+train <- final_merged_df[1:5131,]
+test <- final_merged_df[5132:nrow(final_merged_df),]
+
+# Modelling using NaiveBayes
+final_merged_df$bnd_cat1 = as.factor(final_merged_df$bnd_cat1, levels = c("awful","Bad","Good","Great","Unchanged"))
+model <- NaiveBayes(priceDir ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5 ,data=train)
+predictions <- predict(model, test)
+confusionMatrix(test$priceDir, predictions$class)
