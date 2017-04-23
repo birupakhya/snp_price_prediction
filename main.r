@@ -205,5 +205,5 @@ model.gbm <- gbm((unclass(priceDir)-1) ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat
 prediction.gbm <- predict(model.gbm, newdata = test, n.trees=5000, type="response")
 head(prediction.gbm[])
 tail(prediction.gbm[])
-
-
+predict.f <- ifelse(prediction.gbm>0.5,1,0)
+predict.f - test$priceDir
