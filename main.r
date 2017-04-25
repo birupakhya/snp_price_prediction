@@ -201,9 +201,27 @@ predict.rpt.cv <- predict(price.rpt.cv, newdata = test)
 confusionMatrix(predict.rpt.cv, test$priceDir)
 
 # Modelling using Gradient Boosting
-model.gbm <- gbm((unclass(priceDir)-1) ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data=train, n.trees=5000, interaction.depth =6, shrinkage=0.01)
-prediction.gbm <- predict(model.gbm, newdata = test, n.trees=5000, type="response")
-head(prediction.gbm[])
-tail(prediction.gbm[])
-predict.f <- ifelse(prediction.gbm>0.5,1,0)
-predict.f - test$priceDir
+# model.gbm <- gbm((unclass(priceDir)-1) ~ snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data=train, n.trees=5000, interaction.depth =6, shrinkage=0.01)
+# prediction.gbm <- predict(model.gbm, newdata = test, n.trees=5000, type="response")
+# head(prediction.gbm[])
+# tail(prediction.gbm[])
+# predict.f <- ifelse(prediction.gbm>0.5,1,0)
+# predict.f - test$priceDir
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the GBM model
+set.seed(7)
+modelGbm <- train(priceDir~snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data=final_merged_df, method="gbm", trControl=control, verbose=FALSE)
+# train the NaiveBayes model
+set.seed(7)
+modelNb <- train(priceDir~snp_cat3+ snp_cat4 + snp_cat5 + bnd_cat4 + bnd_cat5 + oil_cat1 + oil_cat2 + oil_cat3 + oil_cat4 + oil_cat5, data=final_merged_df, method="nb", trControl=control, verbose=FALSE)
+# collect resamples
+results <- resamples(list(GBM=modelGbm, NB=modelNb))
+# summarize the distributions
+summary(results)
+# boxplots of results
+bwplot(results)
+# dot plots of results
+dotplot(results)
+
